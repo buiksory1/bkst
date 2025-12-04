@@ -14,24 +14,10 @@ const STORAGE_KEY = "proxy_files"
 const defaultProxyFiles: ProxyFile[] = [
   {
     id: "1",
-    date: "2024-12-04",
-    fileName: "proxy_list_2024-12-04.txt",
-    downloadUrl: "https://example.com/proxy_list_2024-12-04.txt",
+    date: "2025-12-04",
+    fileName: "Proxy US 04-12-2025.xlsx",
+    downloadUrl: "https://dl.surf/file/ebcf7e3e",
     status: "active",
-  },
-  {
-    id: "2",
-    date: "2024-12-03",
-    fileName: "proxy_list_2024-12-03.txt",
-    downloadUrl: "https://example.com/proxy_list_2024-12-03.txt",
-    status: "active",
-  },
-  {
-    id: "3",
-    date: "2024-12-02",
-    fileName: "proxy_list_2024-12-02.txt",
-    downloadUrl: "https://example.com/proxy_list_2024-12-02.txt",
-    status: "expired",
   },
 ]
 
