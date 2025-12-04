@@ -23,7 +23,7 @@ import {
 import { getProxyFiles, addProxyFile, updateProxyFile, deleteProxyFile, type ProxyFile } from "@/lib/proxy-store"
 import Link from "next/link"
 
-const ADMIN_PASSWORD = "admin123" // Change this password
+const ADMIN_PASSWORD = "Tuan250596@" // Change this password
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
