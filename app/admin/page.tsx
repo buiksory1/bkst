@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,7 +20,7 @@ import {
   Clock,
   ArrowLeft,
 } from "lucide-react"
-import { getProxyFiles, addProxyFile, updateProxyFile, deleteProxyFile, type ProxyFile } from "@/lib/proxy-store"
+import type { ProxyFile } from "@/lib/proxy-store"
 import Link from "next/link"
 
 const ADMIN_PASSWORD = "Tuan250596@" // Change this password
@@ -38,22 +38,35 @@ export default function AdminPage() {
     downloadUrl: "",
     status: "active" as ProxyFile["status"],
   })
+  const [isLoading, setIsLoading] = useState(false)
+
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch("/api/proxy-files")
+      const data = await response.json()
+      setProxyFiles(data)
+    } catch (error) {
+      console.error("[v0] Error fetching data:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    // Check if already authenticated
     const auth = sessionStorage.getItem("admin_auth")
     if (auth === "true") {
       setIsAuthenticated(true)
-      setProxyFiles(getProxyFiles())
+      fetchData()
     }
-  }, [])
+  }, [fetchData])
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true)
       sessionStorage.setItem("admin_auth", "true")
-      setProxyFiles(getProxyFiles())
       setPasswordError("")
+      fetchData()
     } else {
       setPasswordError("Incorrect password")
     }
@@ -66,31 +79,57 @@ export default function AdminPage() {
   }
 
   const refreshData = () => {
-    setProxyFiles(getProxyFiles())
+    fetchData()
   }
 
-  const handleAddFile = () => {
+  const handleAddFile = async () => {
     if (!newFile.date || !newFile.fileName || !newFile.downloadUrl) {
       alert("Please fill in all fields")
       return
     }
-    addProxyFile(newFile)
-    setNewFile({ date: "", fileName: "", downloadUrl: "", status: "active" })
-    setIsAdding(false)
-    refreshData()
+    try {
+      await fetch("/api/proxy-files", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newFile),
+      })
+      setNewFile({ date: "", fileName: "", downloadUrl: "", status: "active" })
+      setIsAdding(false)
+      await refreshData()
+    } catch (error) {
+      alert("Failed to add file")
+    }
   }
 
-  const handleUpdateFile = () => {
+  const handleUpdateFile = async () => {
     if (!editingFile) return
-    updateProxyFile(editingFile.id, editingFile)
-    setEditingFile(null)
-    refreshData()
+    try {
+      await fetch(`/api/proxy-files/${editingFile.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editingFile),
+      })
+      setEditingFile(null)
+      await refreshData()
+    } catch (error) {
+      alert("Failed to update file")
+    }
   }
 
-  const handleDeleteFile = (id: string) => {
+  const handleDeleteFile = async (id: string) => {
     if (confirm("Are you sure you want to delete this file?")) {
-      deleteProxyFile(id)
-      refreshData()
+      try {
+        await fetch(`/api/proxy-files/${id}`, {
+          method: "DELETE",
+        })
+        await refreshData()
+      } catch (error) {
+        alert("Failed to delete file")
+      }
     }
   }
 

@@ -1,22 +1,36 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Globe, Download, Shield, Zap, RefreshCw, CheckCircle, XCircle, Clock } from "lucide-react"
-import { getProxyFiles, type ProxyFile } from "@/lib/proxy-store"
+import type { ProxyFile } from "@/lib/proxy-store"
 
 export default function FreeProxyPage() {
   const [proxyFiles, setProxyFiles] = useState<ProxyFile[]>([])
   const [filter, setFilter] = useState<"all" | "active" | "expired">("all")
+  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    setProxyFiles(getProxyFiles())
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch("/api/proxy-files")
+      const data = await response.json()
+      setProxyFiles(data)
+    } catch (error) {
+      console.error("[v0] Error fetching data:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
   const refreshData = () => {
-    setProxyFiles(getProxyFiles())
+    fetchData()
   }
 
   const filteredFiles = proxyFiles.filter((file) => {
@@ -195,7 +209,13 @@ export default function FreeProxyPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {filteredFiles.length === 0 ? (
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                          Loading proxy files...
+                        </td>
+                      </tr>
+                    ) : filteredFiles.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
                           No proxy files available
