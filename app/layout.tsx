@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description:
     "Get free working proxies updated every hour. HTTP, HTTPS, SOCKS4, SOCKS5 proxies from around the world.",
   generator: "v0.app",
+  other: {
+    "google-adsense-account": "ca-pub-2403603288480411",
+  },
 }
 
 export default function RootLayout({
